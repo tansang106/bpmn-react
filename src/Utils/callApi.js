@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as Config from '../Constants/Config';
+import * as Config from '../Contanst/Config';
 
 export default function callApi(endpoint, method = 'GET', body, header) {
     return axios({
