@@ -11,6 +11,7 @@
     "camunda-external-task-client-js": "^1.0.0",
     "install": "^0.12.1",
     "npm": "^6.3.0",
+    "moment": "^2.22.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-redux": "^5.0.7",
