@@ -1,36 +1,27 @@
-import { DEPLOY, GET_PROCESS, START_PROCESS } from '../Actions/process';
+import { DEPLOY, GET_PROCESS_DEFINITION, START_PROCESS_DEFINITION } from '../Actions/processDefinition';
 import moment from 'moment';
-// var data = JSON.parse(localStorage.getItem('PROCESS'));
-// var initialState = data ? data : [];
 var initialState = [];
 
 
-const process = (state = initialState, action) => {
-    console.log(action)
+export default (state = initialState, action) => {
     switch (action.type) {
         case DEPLOY:
-            // state.push(action.data);
-            // localStorage.setItem('PROCESS', JSON.stringify(state))
             return [...state];
-        case GET_PROCESS:
+        case GET_PROCESS_DEFINITION:
             state = action.data
             return [...state];
-        case START_PROCESS:
-            // var data = [];
+        case START_PROCESS_DEFINITION:
             let data = JSON.parse(localStorage.getItem('PROCESS'));
-            // state = JSON.parse(localStorage.getItem('PROCESS'));
             var dataProcess = data ? data : [];
-            var process = {
+            var newInstance = {
                 processInstanceId: action.data.id,
                 definitionKey: action.key,
                 date: moment().format("YYYY-MM-DD HH:mm:ss"),
                 id: action.code
             }
-            dataProcess.push(process)
+            dataProcess.push(newInstance)
             localStorage.setItem('PROCESS', JSON.stringify(dataProcess));
             return [...state];
         default: return [...state];
     }
 };
-
-export default process; 

@@ -53,6 +53,9 @@ export const getInstanceInfoAction = (processInstanceId) => {
 				if (res.data.state != 'COMPLETED') {
 					dispatch(getInstanceChildnodeAction(processInstanceId));
 				}
+				else {
+					dispatch(getInstanceChildnodeAction([]));
+				}
 			})
 			.catch(err => console.log())
 	}

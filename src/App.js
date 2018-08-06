@@ -10,7 +10,6 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import { connect } from 'react-redux';
-import { deployProcessRequest } from './Actions/process';
 import DiagramComponent from './Components/DiagramComponent';
 import IncidentList from './Components/IncidentList';
 import InformationComponent from './Components/InformationComponent';
@@ -22,7 +21,8 @@ import {
   getDiagramXMLAction,
   choosingTaskAction
 } from './Actions/currentDiagram';
-import { deployProcess, getProcess, startProcess } from './Actions/process';
+import { deployProcessDefinition , getProcessDefinition, startProcessDefinition } from './Actions/processDefinition';
+import { getListIncidentAction } from './Actions/incidentList';
 import Modal from '@material-ui/core/Modal';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -32,9 +32,7 @@ import moment from 'moment';
 
 const styles = theme => ({
     root: {
-        // flexGrow: 1,
         width: '100%',
-        // maxWidth: 360,
         backgroundColor: theme.palette.background.paper,
         position: 'relative',
         overflow: 'auto',
@@ -62,20 +60,12 @@ const styles = theme => ({
         backgroundColor: theme.palette.background.paper,
         boxShadow: theme.shadows[5],
         padding: theme.spacing.unit * 4,
-    },
-
+    }
 });
 
-// function rand() {
-//     return Math.round(Math.random() * 20) - 10;
-// }
-
 function getModalStyle() {
-    // const top = 50 + rand();
-    // const left = 50 + rand();
     const top = 50;
     const left = 50;
-
     return {
         top: `${top}%`,
         left: `${left}%`,
@@ -93,53 +83,52 @@ class App extends Component {
     }
     this.interval = ''
   }
+  componentDidMount() {
+    this.props.getListIncident();
+    setInterval(() => this.props.getListIncident(), 5000);
+  }
   handleOpen = () => {
-       this.setState({ open: true });
-   };
+      this.props.getProcessDefinition();
+      this.setState({ open: true });
+  };
 
-    handleClose = () => {
-        this.setState({ open: false });
-    };
+  handleClose = () => {
+      this.setState({ open: false });
+  };
 
-    componentDidMount() {
-        this.props.getProcess();
-    }
+  onChange = async (e) => {
+      await this.setState({
+          image: e.target.files[0]
+      })
+      var formData = new FormData();
+      formData.append("upload", this.state.image);
+      this.props.deployProcessDefinition(formData);
+  }
+  onClickStart = (keyProcess) => {
+      let code = moment().unix()
+      let data = {
+          "variables": {
+              "incidentID": { "value": code }
+          }
+      }
+      this.props.startProcessDefinition(keyProcess, data, code);
+      this.handleClose();
+  }
 
-    onChange = async (e) => {
-        await this.setState({
-            image: e.target.files[0]
-        })
-        var formData = new FormData();
-        formData.append("upload", this.state.image);
-        this.props.deployProcess(formData);
-    }
-
-
-    onClickStart = (keyProcess) => {
-        let code = moment().unix()
-        let data = {
-            "variables": {
-                "incidentID": { "value": code }
-            }
-        }
-        this.props.startProcess(keyProcess, data, code);
-        this.handleClose();
-    }
-
-    showTask = (process, classes) => {
-        let result = null;
-        if (process.length > 0) {
-            result = process.map((item, index) => {
-                let nameTask = (item.name) ? item.name : item.key
-                return (
-                    <ListItem button key={index} onClick={() => this.onClickStart(item.key)}>
-                        <ListItemText primary={nameTask} />
-                    </ListItem>
-                )
-            })
-        }
-        return result;
-    }
+  showTask = (processDefinition, classes) => {
+      let result = null;
+      if (processDefinition.length > 0) {
+          result = processDefinition.map((item, index) => {
+              let nameTask = (item.name) ? item.name : item.key
+              return (
+                  <ListItem button key={index} onClick={() => this.onClickStart(item.key)}>
+                      <ListItemText primary={nameTask} />
+                  </ListItem>
+              )
+          })
+      }
+      return result;
+  }
   onChangeCurrentDiagram = (processInstanceId, definitionKey) => {
     clearInterval(this.interval);
     this.props.changeDiagram({
@@ -161,6 +150,7 @@ class App extends Component {
     if(instanceChildnode.childActivityInstances) {
       instanceChildnode.childActivityInstances.map(c => {
         if (c.activityId == chosenTaskId) {
+          console.log(this.props.currentDiagram);
           isActive = true;
         }
       });
@@ -172,7 +162,7 @@ class App extends Component {
       classes, 
       incidentList, 
       currentDiagram,
-      process
+      processDefinition
       } = this.props;
     return (
       <div className="App">
@@ -207,13 +197,7 @@ class App extends Component {
                                 subheader={<ListSubheader component="div">List Task</ListSubheader>}
                                 className={`${classes.root}`} 
                             >
-                                {/* <ListItem button>
-                                    <ListItemText primary="Trash" />
-                                </ListItem>
-                                <ListItem button component="a" href="#simple-list">
-                                    <ListItemText primary="Spam" />
-                                </ListItem> */}
-                                {this.showTask(process, classes)}
+                                {this.showTask(processDefinition, classes)}
                             </List>
                         </div>
                     </Modal>
@@ -268,7 +252,7 @@ App.propTypes = {
 
 const mapStateToProps = state => {
     return {
-        process: state.process,
+        processDefinition: state.processDefinition,
         incidentList: state.incidentList,
         currentDiagram: state.currentDiagram
     }
@@ -276,8 +260,14 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = (dispatch, props) => {
     return {
-        deployProcess: (data) => {
-            dispatch(deployProcess(data))
+        deployProcessDefinition: (data) => {
+            dispatch(deployProcessDefinition(data))
+        },
+        getProcessDefinition: () => {
+            dispatch(getProcessDefinition())
+        },
+        startProcessDefinition: (key, data, code) => {
+            dispatch(startProcessDefinition(key, data, code))
         },
         changeDiagram: (data) => {
           dispatch(changeDiagramAction(data))
@@ -297,11 +287,8 @@ const mapDispatchToProps = (dispatch, props) => {
         choosingTask: (chosenTaskId, instanceHistory, isActive) => {
           dispatch(choosingTaskAction(chosenTaskId, instanceHistory, isActive))
         },
-        getProcess: () => {
-            dispatch(getProcess())
-        },
-        startProcess: (key, data, code) => {
-            dispatch(startProcess(key, data, code))
+        getListIncident: () => {
+          dispatch(getListIncidentAction())
         }
     }
 }
