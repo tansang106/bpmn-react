@@ -10,6 +10,18 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import { connect } from 'react-redux';
+import { deployProcessRequest } from './Actions/process';
+import DiagramComponent from './Components/DiagramComponent';
+import IncidentList from './Components/IncidentList';
+import InformationComponent from './Components/InformationComponent';
+import {
+  changeDiagramAction, 
+  getInstanceHistoryAction,
+  getInstanceInfoAction,
+  getInstanceChildnodeAction,
+  getDiagramXMLAction,
+  choosingTaskAction
+} from './Actions/currentDiagram';
 import { deployProcess, getProcess, startProcess } from './Actions/process';
 import Modal from '@material-ui/core/Modal';
 import List from '@material-ui/core/List';
@@ -73,18 +85,17 @@ function getModalStyle() {
 
 
 class App extends Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            image: '',
-            open: false,
-        }
+  constructor(props) {
+    super(props);
+    this.state = {
+      image: '',
+      open: false
     }
-
-    handleOpen = () => {
-        this.setState({ open: true });
-    };
+    this.interval = ''
+  }
+  handleOpen = () => {
+       this.setState({ open: true });
+   };
 
     handleClose = () => {
         this.setState({ open: false });
@@ -129,13 +140,43 @@ class App extends Component {
         }
         return result;
     }
+  onChangeCurrentDiagram = (processInstanceId, definitionKey) => {
+    clearInterval(this.interval);
+    this.props.changeDiagram({
+      processInstanceId: processInstanceId,
+      definitionKey: definitionKey
+    });
+    this.props.getDiagramXML(definitionKey);
+    this.props.getInstanceHistory(processInstanceId);
+    this.props.getInstanceInfo(processInstanceId);
 
-    render() {
-        const { classes, process } = this.props;
-        console.log(process)
-        return (
-            <div className="App">
-                <AppBar position="static">
+    this.interval = setInterval(() => {
+      this.props.getInstanceHistory(processInstanceId);
+      this.props.getInstanceInfo(processInstanceId);
+    }, 5000);
+  }
+  onClickGetTaskInformation = (chosenTaskId) => {
+    let isActive = false;
+    const {instanceChildnode} = this.props.currentDiagram;
+    if(instanceChildnode.childActivityInstances) {
+      instanceChildnode.childActivityInstances.map(c => {
+        if (c.activityId == chosenTaskId) {
+          isActive = true;
+        }
+      });
+    }
+    this.props.choosingTask(chosenTaskId, this.props.currentDiagram.instanceHistory, isActive);
+  }
+  render() {
+    const { 
+      classes, 
+      incidentList, 
+      currentDiagram,
+      process
+      } = this.props;
+    return (
+      <div className="App">
+         <AppBar position="static">
                     <Toolbar>
                         <IconButton className={`${classes.menuButton}`} color="inherit" aria-label="Menu">
                             <MenuIcon />
@@ -177,20 +218,48 @@ class App extends Component {
                         </div>
                     </Modal>
                 </AppBar>
-                <header className="App-header">
-                    <img src={logo} className="App-logo" alt="logo" />
-                    <h1 className="App-title">Welcome to React</h1>
-                </header>
 
-                <p className="App-intro">
-                    To get started, edit <code>src/App.js</code> and save to reload.
-          <input type="file" onChange={this.onChange} />
-                    <button onClick={this.onClick}>Click</button>
-                </p>
-
+        <header className="App-header">
+          <img src={'http://farayandgostar.com/wp-content/uploads/2016/09/2443838.png'} className="App-logo" alt="logo" />
+          <h1 className="App-title">Welcome to Cà Mụn Đã</h1>
+        </header>
+        {/* Mid Start */}
+        <div style={{width: '100%', height: '300px', marginBottom: '50px'}}>
+          <div style={{width: '40%', 
+                      float: 'left', 
+                      borderStyle: 'groove', 
+                      margin: '20px 0 0 0',
+                      height: '300px'
+                    }}>
+            <div style={{height: '100px', 
+                        lineHeight: '100px',
+                        color: 'brown',
+                        fontWeight: 'bold',
+                        fontSize: '20pt'
+                      }}>
+              {currentDiagram.definitionKey != '' ? currentDiagram.definitionKey + ' BPMN' : ''}
             </div>
-        );
-    }
+            <DiagramComponent 
+              currentDiagram={currentDiagram}
+              onClickGetTaskInformation={this.onClickGetTaskInformation}
+            />
+          </div>
+          <div style={{width: '59%', float: 'left'}}>
+            <IncidentList 
+              data={incidentList} 
+              currentInstanceID={currentDiagram.processInstanceId}
+              onChangeCurrentDiagram={this.onChangeCurrentDiagram}
+            />
+          </div>
+        </div>
+        {/* Mid End */}
+
+        {/* Bottom Start */}
+        <InformationComponent data={currentDiagram.currentChosenTask}/>
+        {/* Bottom End */}
+      </div>
+    );
+  }
 }
 
 App.propTypes = {
@@ -200,6 +269,8 @@ App.propTypes = {
 const mapStateToProps = state => {
     return {
         process: state.process,
+        incidentList: state.incidentList,
+        currentDiagram: state.currentDiagram
     }
 }
 
@@ -208,11 +279,27 @@ const mapDispatchToProps = (dispatch, props) => {
         deployProcess: (data) => {
             dispatch(deployProcess(data))
         },
-
+        changeDiagram: (data) => {
+          dispatch(changeDiagramAction(data))
+        },
+        getDiagramXML: (definitionKey) => {
+          dispatch(getDiagramXMLAction(definitionKey))
+        },
+        getInstanceHistory: (processInstanceId) => {
+          dispatch(getInstanceHistoryAction(processInstanceId))
+        },
+        getInstanceInfo: (processInstanceId) => {
+          dispatch(getInstanceInfoAction(processInstanceId))
+        },
+        getInstanceChildnode: (processInstanceId) => {
+          dispatch(getInstanceChildnodeAction(processInstanceId))
+        },
+        choosingTask: (chosenTaskId, instanceHistory, isActive) => {
+          dispatch(choosingTaskAction(chosenTaskId, instanceHistory, isActive))
+        },
         getProcess: () => {
             dispatch(getProcess())
         },
-
         startProcess: (key, data, code) => {
             dispatch(startProcess(key, data, code))
         }
