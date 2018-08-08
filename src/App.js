@@ -149,7 +149,6 @@ class App extends Component {
     if(instanceChildnode.childActivityInstances) {
       instanceChildnode.childActivityInstances.map(c => {
         if (c.activityId == chosenTaskId) {
-          console.log(this.props.currentDiagram);
           isActive = true;
         }
       });

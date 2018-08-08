@@ -13,6 +13,7 @@ const fs = require("fs");
 //     //await taskService.unlock(task);
 client.subscribe("AlarmtoSCCD", async ({task, taskService}) => {
     console.log("Alarm to SCCD", task.variables.get("incidentID"));
+
     await taskService.complete(task);
 })
 
@@ -31,7 +32,7 @@ client.subscribe("PhonetoBoss", async ({task, taskService}) => {
     //     const processVariables = new Variables();
     //     if (response.data.success == 'true') {
     //         processVariables.set("status", "true");
-    //         processVariables.set("log", `incidentID ${incidentID} is automatically phoned to boss at ${moment().format("YYYY-MM-DD hh:mm:ss")}`);
+    //         processVariables.set("log", `incidentID ${incidentID} is automatically phoned to boss at ${moment().format("DD-MM-YYYY hh:mm:ss")}`);
     //     }
     //     else {
     //         processVariables.set("status", "false");
@@ -43,7 +44,7 @@ client.subscribe("PhonetoBoss", async ({task, taskService}) => {
 
     const processVariables = new Variables();
     processVariables.set("status", "true");
-    processVariables.set("log", `incidentID ${incidentID} is automatically phoned to boss at ${moment().format("YYYY-MM-DD hh:mm:ss")}`);
+    processVariables.set("log", `incidentID ${incidentID} is automatically phoned to boss at ${moment().format("DD-MM-YYYY hh:mm:ss")}`);
     taskService.complete(task, processVariables);
 })
 
@@ -51,7 +52,7 @@ client.subscribe("PhonetoBoss", async ({task, taskService}) => {
 
 client.subscribe("LoggerIncident", async ({task, taskService}) => {
     const incidentID = task.variables.get("incidentID");
-    const log = task.variables.get("username") ? `incidentID ${incidentID} was authenticated by ${task.variables.get("username")} at ${moment().format("YYYY-MM-DD hh:mm:ss")}` : 
+    const log = task.variables.get("username") ? `incidentID ${incidentID} was authenticated by ${task.variables.get("username")} at ${moment().format("DD-MM-YYYY hh:mm:ss")}` : 
         task.variables.get("log");
     console.log('logger', log);
     var logger = fs.createWriteStream('log.txt', {
@@ -66,14 +67,17 @@ client.subscribe("LoggerIncident", async ({task, taskService}) => {
 
 client.subscribe("SendEscalateEmail", async ({task, taskService}) => {
     console.log('Send email!!!', task.variables.get("incidentID"));
-    axios.post('http://ticketopsapi.fpt.vn/TicketMobile.svc/InsertEmail', {
-        "TicketCode": "SC0808180081",
-        "Msg": "tesst",
-        "MailTo": "baotm2@fpt.com.vn",
-        "MailCC": "",
-        "Telegram": ""
+    axios('http://ticketopsapi.fpt.vn/TicketMobile.svc/InsertEmail', {
+        method: 'POST',
+        data: {
+            TicketCode: 'SC0808180081',
+            Msg: 'Alarm from Camunda',
+            MailTo: 'baotm2@fpt.com.vn',
+            MailCC: '',
+            Telegram: ''
+        }
     }).then(res => {
-        console.log('Send mail succesfully!!!', res);
+        console.log('Send mail succesfully!!!', res.data);
         taskService.complete(task);
-    }).catch(err => console.log(err));
+    })
 })

@@ -16,7 +16,7 @@ export default (state = initialState, action) => {
             var newInstance = {
                 processInstanceId: action.data.id,
                 definitionKey: action.key,
-                date: moment().format("YYYY-MM-DD HH:mm:ss"),
+                date: moment().format("DD-MM-YYYY hh:mm:ss"),
                 id: action.code
             }
             dataProcess.push(newInstance)

@@ -6,6 +6,8 @@ import {CHANGE_DIAGRAM,
 		CHOOSING_TASK
 } from '../Contanst/ActionType';
 import callAPI from '../Utils/callApi';
+import moment from 'moment';
+import toastr from 'toastr';
 export const changeDiagramAction = (data) => {
     return (dispatch) => {
     	dispatch({
@@ -92,19 +94,27 @@ export const choosingTaskAction = (chosenTaskId, instanceHistory, isActive) => {
 	instanceHistory.map(eachModel => {
 		if (eachModel.activityId == chosenTaskId) {
 			data = [
-				{key: 'Activity ID',value: eachModel.activityId},
 				{key: 'Activity Name',value: eachModel.activityName},
-				{key: 'Activity Type',value: eachModel.activityType},
-				{key: 'Process Instance ID',value: eachModel.processInstanceId},
-				{key: 'Task ID',value: eachModel.taskId},
-				{key: 'Execution ID',value: eachModel.executionId},
-				{key: 'Start Time',value: eachModel.startTime}
+				{key: 'Start Time',value: moment(eachModel.startTime).format("DD-MM-YYYY hh:mm:ss")},
+				{key: 'End Time', value: moment(eachModel.endTime).format("DD-MM-YYYY hh:mm:ss")}
 			];
-			if (eachModel.activityType == 'userTask' && isActive) {
-				data.unshift({
-					key: 'Complete User Task',
-					value: () => completeUserTask(eachModel.taskId)
-				})
+			if (eachModel.activityType == 'userTask') {
+				if (isActive) {
+					data.unshift({
+						key: 'Complete User Task',
+						value: () => completeUserTask(eachModel.taskId)
+					})
+				} else {
+					const userTaskHistory = JSON.parse(localStorage.getItem('USER_TASK_HISTORY')) || [];
+					userTaskHistory.map(u => {
+						if (u.taskId == eachModel.taskId) {
+							data.unshift({
+								key: 'Completed By',
+								value: u.username
+							})
+						}
+					})
+				}
 			}
 		}
 	});
@@ -117,14 +127,19 @@ export const choosingTaskAction = (chosenTaskId, instanceHistory, isActive) => {
 }
 
 const completeUserTask = (taskId) => {
+	const username = "BaoTM2";
 	callAPI(`task/${taskId}/complete`,
 			'POST',
 			{
 				"variables": {
-					"username": {"value": "admin"}
+					"username": {"value": username}
 				}
 			},
-			{});
+			{}).then(res => {
+				let data = JSON.parse(localStorage.getItem('USER_TASK_HISTORY')) || [];
+				data.push({taskId, username});
+				localStorage.setItem('USER_TASK_HISTORY', JSON.stringify(data));
+			}).catch(err => console.log(err));
 	document.getElementById('completeTaskButton').disabled = true;
-	alert('Đã gửi request!');
+	toastr.success('Đã gửi request!');
 }

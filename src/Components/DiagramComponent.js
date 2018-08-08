@@ -5,10 +5,11 @@ import './diagram-js.css';
 class bpmnView extends React.Component{
   constructor(){
     super();
-    this.viewer = new BpmnViewer({height: 150});
     this.state = {
-      modalIsOpen: false
+      modalIsOpen: false,
+      height: 200
     }
+    this.viewer = new BpmnViewer({height: this.state.height});
   }
   componentDidMount(){
     this.viewer.attachTo('#Bpmn');
