@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0dj0gmt" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.16.2">
+  <bpmn:process id="ResolveIncident" name="Resolve Incident" isExecutable="true">
+    <bpmn:userTask id="TakeIncident" name="Take Incident">
+      <bpmn:incoming>SequenceFlow_0lzpa9h</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0sedtpp</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="LoggerIncident" name="Logger" camunda:type="external" camunda:topic="LoggerIncident">
+      <bpmn:incoming>SequenceFlow_0sedtpp</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0e0mwob</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1reqjab</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="ResolveIncidentEnd" name="End">
+      <bpmn:incoming>SequenceFlow_1reqjab</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0mqaqm3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:boundaryEvent id="BoundaryEvent_1xg2nsu" name="1 mins" attachedToRef="TakeIncident">
+      <bpmn:outgoing>SequenceFlow_0lahboc</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1reqjab" sourceRef="LoggerIncident" targetRef="ResolveIncidentEnd" />
+    <bpmn:serviceTask id="AlarmtoSCCD" name="Alarm to SCCD" camunda:type="external" camunda:topic="AlarmtoSCCD">
+      <bpmn:incoming>SequenceFlow_16si95k</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0lzpa9h</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="PhonetoBoss" name="Phone to Boss" camunda:type="external" camunda:topic="PhonetoBoss">
+      <bpmn:incoming>SequenceFlow_0lahboc</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_13qgyj1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0lahboc" sourceRef="BoundaryEvent_1xg2nsu" targetRef="PhonetoBoss" />
+    <bpmn:sequenceFlow id="SequenceFlow_0lzpa9h" sourceRef="AlarmtoSCCD" targetRef="TakeIncident" />
+    <bpmn:intermediateThrowEvent id="IntermediateThrowEvent_1moflal" name="Send Escalate Email">
+      <bpmn:incoming>SequenceFlow_0b4755x</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0mqaqm3</bpmn:outgoing>
+      <bpmn:messageEventDefinition camunda:type="external" camunda:topic="SendEscalateEmail" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0sedtpp" name="username != null" sourceRef="TakeIncident" targetRef="LoggerIncident">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{username != null}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_13qgyj1" sourceRef="PhonetoBoss" targetRef="ExclusiveGateway_0oy587h" />
+    <bpmn:sequenceFlow id="SequenceFlow_0mqaqm3" sourceRef="IntermediateThrowEvent_1moflal" targetRef="ResolveIncidentEnd" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0oy587h" name="Logic GATE" default="SequenceFlow_0b4755x">
+      <bpmn:incoming>SequenceFlow_13qgyj1</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0b4755x</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_0e0mwob</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_0b4755x" sourceRef="ExclusiveGateway_0oy587h" targetRef="IntermediateThrowEvent_1moflal" />
+    <bpmn:sequenceFlow id="SequenceFlow_0e0mwob" name="status == true" sourceRef="ExclusiveGateway_0oy587h" targetRef="LoggerIncident">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{status == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_01byczh" sourceRef="ResolveIncidentStart" targetRef="ExclusiveGateway_14bbi8s" />
+    <bpmn:startEvent id="ResolveIncidentStart" name="Start">
+      <bpmn:outgoing>SequenceFlow_01byczh</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_16si95k" name="incidentID != null" sourceRef="ExclusiveGateway_14bbi8s" targetRef="AlarmtoSCCD">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{incidentID != null}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:inclusiveGateway id="ExclusiveGateway_14bbi8s">
+      <bpmn:incoming>SequenceFlow_01byczh</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_16si95k</bpmn:outgoing>
+    </bpmn:inclusiveGateway>
+  </bpmn:process>
+  <bpmn:message id="Message_1anzppf" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="ResolveIncident">
+      <bpmndi:BPMNEdge id="SequenceFlow_1reqjab_di" bpmnElement="SequenceFlow_1reqjab">
+        <di:waypoint x="911" y="159" />
+        <di:waypoint x="1022" y="159" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_19ma9sf_di" bpmnElement="TakeIncident">
+        <dc:Bounds x="505" y="119" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0q328tw_di" bpmnElement="LoggerIncident">
+        <dc:Bounds x="811" y="119" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0h16ewy_di" bpmnElement="ResolveIncidentEnd">
+        <dc:Bounds x="1022" y="141" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1033" y="184" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_1dlocy9_di" bpmnElement="BoundaryEvent_1xg2nsu">
+        <dc:Bounds x="537" y="181" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="571" y="213" width="33" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateThrowEvent_0vnk4de_di" bpmnElement="IntermediateThrowEvent_1moflal">
+        <dc:Bounds x="975" y="289" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="958" y="332" width="71" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1p3zdp5_di" bpmnElement="AlarmtoSCCD">
+        <dc:Bounds x="331" y="119" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1pjv5ll_di" bpmnElement="PhonetoBoss">
+        <dc:Bounds x="671" y="267" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0lahboc_di" bpmnElement="SequenceFlow_0lahboc">
+        <di:waypoint x="555" y="217" />
+        <di:waypoint x="555" y="307" />
+        <di:waypoint x="671" y="307" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0lzpa9h_di" bpmnElement="SequenceFlow_0lzpa9h">
+        <di:waypoint x="431" y="159" />
+        <di:waypoint x="505" y="159" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0sedtpp_di" bpmnElement="SequenceFlow_0sedtpp">
+        <di:waypoint x="605" y="159" />
+        <di:waypoint x="811" y="159" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="665" y="142" width="83" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_13qgyj1_di" bpmnElement="SequenceFlow_13qgyj1">
+        <di:waypoint x="771" y="307" />
+        <di:waypoint x="836" y="307" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0mqaqm3_di" bpmnElement="SequenceFlow_0mqaqm3">
+        <di:waypoint x="993" y="289" />
+        <di:waypoint x="993" y="159" />
+        <di:waypoint x="1022" y="159" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0oy587h_di" bpmnElement="ExclusiveGateway_0oy587h" isMarkerVisible="true">
+        <dc:Bounds x="836" y="282" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="832" y="339" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0b4755x_di" bpmnElement="SequenceFlow_0b4755x">
+        <di:waypoint x="886" y="307" />
+        <di:waypoint x="975" y="307" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0e0mwob_di" bpmnElement="SequenceFlow_0e0mwob">
+        <di:waypoint x="861" y="282" />
+        <di:waypoint x="861" y="199" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="778" y="222" width="68" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_01byczh_di" bpmnElement="SequenceFlow_01byczh">
+        <di:waypoint x="180" y="159" />
+        <di:waypoint x="209" y="159" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_0gzondg_di" bpmnElement="ResolveIncidentStart">
+        <dc:Bounds x="144" y="141" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="149" y="117" width="25" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_16si95k_di" bpmnElement="SequenceFlow_16si95k">
+        <di:waypoint x="259" y="159" />
+        <di:waypoint x="331" y="159" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="245" y="126" width="83" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="InclusiveGateway_0b2iqkn_di" bpmnElement="ExclusiveGateway_14bbi8s">
+        <dc:Bounds x="209" y="134" width="50" height="50" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

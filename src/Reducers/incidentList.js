@@ -6,7 +6,18 @@ const initialState = [];
 export default (state = initialState, action) => {
     switch (action.type) {
     	case GET_INCIDENT_LIST:
-    		return action.payload;
+    		var length = action.payload.length;
+    		let newState = action.payload;
+    		for (var i = 0; i < length - 1; i++) {
+    			for (var j = i + 1; j < length; j++) {
+    				if (newState[i].id > newState[j].id) {
+    					let temp = newState[i];
+    					newState[i] = newState[j];
+    					newState[j] = temp;
+    				}
+    			}
+    		}
+    		return newState;
         default: 
             return state;
     }

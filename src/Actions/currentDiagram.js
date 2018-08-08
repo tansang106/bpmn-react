@@ -27,6 +27,7 @@ export const getDiagramXMLAction = (definitionKey) => {
 			.catch(err => console.log())
 	}
 }
+
 export const getInstanceHistoryAction = (processInstanceId) => {
 	return (dispatch) => {
 		callAPI(`history/activity-instance?processInstanceId=${processInstanceId}`,
@@ -54,7 +55,7 @@ export const getInstanceInfoAction = (processInstanceId) => {
 					dispatch(getInstanceChildnodeAction(processInstanceId));
 				}
 				else {
-					dispatch(getInstanceChildnodeAction([]));
+					dispatch(getInstanceChildnodeAction(null));
 				}
 			})
 			.catch(err => console.log())
@@ -62,22 +63,28 @@ export const getInstanceInfoAction = (processInstanceId) => {
 }
 
 export const getInstanceChildnodeAction = (processInstanceId) => {
-	return (dispatch) => {
-		callAPI(`process-instance/${processInstanceId}/activity-instances`,
-			'GET',{},{})
+	if (!processInstanceId) {
+		return (dispatch => {
+			dispatch({
+				type: GET_INSTANCE_CHILDNODE,
+				payload: []
+			})
+		})
+	}
+	else {
+		return (dispatch) => {
+			callAPI(`process-instance/${processInstanceId}/activity-instances`,
+				'GET',{},{})
 			.then(res => {
 				dispatch({
 					type: GET_INSTANCE_CHILDNODE,
 					payload: res.data
 				})
-			})
-			.catch(err => {
-				dispatch({
-					type: GET_INSTANCE_CHILDNODE,
-					payload: []
-				})
-			})
-	}
+			}).catch(err => {
+				console.log(err);
+			});
+		}
+	}	
 }
 
 export const choosingTaskAction = (chosenTaskId, instanceHistory, isActive) => {

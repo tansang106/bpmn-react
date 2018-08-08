@@ -33,8 +33,28 @@ const styles = theme => ({
 });
 
 class CustomizedTable extends React.Component {
+
+  constructor(props){
+        super(props);
+        this.state = {
+            filterStatus: 'ALL',
+            filterName: ''
+        }
+  }
+  onFilterNameChange = (event) => {
+      this.setState({filterName: event.target.value})
+  }
+  onFilterStatusChange = (event) => {
+    this.setState({filterStatus: event.target.value})
+  }
   render() {
-    const { classes, data, currentInstanceID } = this.props;
+    const { classes, currentInstanceID, search, filterTask } = this.props;
+    const { filterStatus, filterName } = this.state;
+    let data = this.props.data;
+    data = data.filter(d => d.id.toString().toLowerCase().includes(filterName));
+    if (filterStatus != 'ALL') {
+      data = data.filter(d => d.status == filterStatus);
+    }
     return (
       <Paper className={classes.root}>
         <Table className={classes.table}>
@@ -48,6 +68,21 @@ class CustomizedTable extends React.Component {
             </TableRow>
           </TableHead>
           <TableBody>
+            <TableRow>
+                <CustomTableCell>
+                  <input name="filterName" value={filterName} onChange={this.onFilterNameChange} type="text" className="form-control" />
+                </CustomTableCell>
+                <CustomTableCell></CustomTableCell>
+                <CustomTableCell></CustomTableCell>
+                <CustomTableCell></CustomTableCell>
+                <CustomTableCell>
+                   <select name="filterStatus" value={filterStatus} onChange={this.onFilterStatusChange} className="form-control">
+                      <option value="ALL">All Ticket</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="ACTIVE">Active</option>
+                    </select>                  
+                </CustomTableCell>
+              </TableRow>
             {data.map(n => {
               return (
                 <TableRow className={classes.row} key={n.id} 
