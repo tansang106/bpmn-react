@@ -6,10 +6,9 @@ class bpmnView extends React.Component{
   constructor(){
     super();
     this.state = {
-      modalIsOpen: false,
-      height: 200
+      modalIsOpen: false
     }
-    this.viewer = new BpmnViewer({height: this.state.height});
+    this.viewer = new BpmnViewer({height: 200});
   }
   componentDidMount(){
     this.viewer.attachTo('#Bpmn');
@@ -25,7 +24,8 @@ class bpmnView extends React.Component{
       instanceInfo,
       xml
     } = this.props.currentDiagram;
-    if (xml.bpmn20Xml) {
+    if (xml.bpmn20Xml && xml.id.includes(instanceInfo.processDefinitionKey) && 
+        xml.id.includes(instanceHistory[0].processDefinitionKey)) {
       this.importXML(xml.bpmn20Xml, this.viewer, instanceHistory, instanceInfo, instanceChildnode)
     }
   }
@@ -55,17 +55,6 @@ class bpmnView extends React.Component{
           }
         })
         if (currentTask) {
-            // overlays.add(currentTask, 'userTask', {
-            //   position: {
-            //     right: 0
-            //   },
-            //   html: 
-            //   `<img 
-            //   src="http://www.iconconnect.com/wp-content/uploads/2016/06/iocn-audiovisual.png" 
-            //   width="25px" 
-            //   height="25px"
-            //   />`
-            // });
             canvas.addMarker(currentTask, 'currentTask');
         }
       });

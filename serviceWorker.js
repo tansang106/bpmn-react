@@ -4,7 +4,7 @@ const {
     Variables
   } = require("camunda-external-task-client-js");
 const moment = require("moment");
-const config = { baseUrl: "http://localhost:8080/engine-rest", use: logger };
+const config = { baseUrl: "http://42.116.254.246:8080/engine-rest", use: logger };
 const client = new Client(config);
 const axios = require("axios");
 const fs = require("fs");
