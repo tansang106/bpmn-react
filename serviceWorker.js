@@ -67,17 +67,19 @@ client.subscribe("LoggerIncident", async ({task, taskService}) => {
 
 client.subscribe("SendEscalateEmail", async ({task, taskService}) => {
     console.log('Send email!!!', task.variables.get("incidentID"));
-    axios('http://ticketopsapi.fpt.vn/TicketMobile.svc/InsertEmail', {
-        method: 'POST',
-        data: {
-            TicketCode: 'SC0808180081',
-            Msg: 'Alarm from Camunda',
-            MailTo: 'baotm2@fpt.com.vn',
-            MailCC: '',
-            Telegram: ''
-        }
-    }).then(res => {
-        console.log('Send mail succesfully!!!', res.data);
-        taskService.complete(task);
-    })
+    // axios('http://ticketopsapi.fpt.vn/TicketMobile.svc/InsertEmail', {
+    //     method: 'POST',
+    //     data: {
+    //         TicketCode: 'SC0808180081',
+    //         Msg: 'Alarm from Camunda',
+    //         MailTo: 'baotm2@fpt.com.vn',
+    //         MailCC: '',
+    //         Telegram: ''
+    //     }
+    // }).then(res => {
+    //     console.log('Send mail succesfully!!!', res.data);
+    //     taskService.complete(task);
+    // })
+    
+    taskService.complete(task);
 })
