@@ -104,7 +104,7 @@ class App extends Component {
       this.props.deployProcessDefinition(formData);
   }
   onClickStart = (keyProcess) => {
-      let code = moment().unix()
+      let code = "SC" + moment().format("DDMMYYmmss");
       let data = {
           "variables": {
               "incidentID": { "value": code }

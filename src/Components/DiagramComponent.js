@@ -24,9 +24,8 @@ class bpmnView extends React.Component{
       instanceInfo,
       xml
     } = this.props.currentDiagram;
-    if (xml.bpmn20Xml && xml.id.includes(instanceInfo.processDefinitionKey) && 
-        xml.id.includes(instanceHistory[0].processDefinitionKey)) {
-      this.importXML(xml.bpmn20Xml, this.viewer, instanceHistory, instanceInfo, instanceChildnode)
+    if (xml.bpmn20Xml) {
+      this.importXML(xml.bpmn20Xml, this.viewer, instanceHistory, instanceInfo, instanceChildnode);
     }
   }
   render(){
@@ -49,14 +48,16 @@ class bpmnView extends React.Component{
             overlays = Viewer.get('overlays');
         // zoom to fit full viewport
         canvas.zoom('fit-viewport', 'auto');
-        history.map(h => {
-          if(h != currentTask) {
-            canvas.addMarker(h, 'complete');
+        try {
+          history.map(h => {
+            if(h != currentTask) {
+              canvas.addMarker(h, 'complete');
+            }
+          })
+          if (currentTask) {
+              canvas.addMarker(currentTask, 'currentTask');
           }
-        })
-        if (currentTask) {
-            canvas.addMarker(currentTask, 'currentTask');
-        }
+        }catch (ex) {}
       });
     }
 }
