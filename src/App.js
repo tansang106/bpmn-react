@@ -28,7 +28,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import moment from 'moment';
-
+import ModelerComponent from './Components/ModelerComponent';
 const styles = theme => ({
     root: {
         width: '100%',
@@ -78,7 +78,8 @@ class App extends Component {
     super(props);
     this.state = {
       image: '',
-      open: false
+      open: false,
+      page: 'home'
     }
     this.interval = ''
   }
@@ -162,6 +163,7 @@ class App extends Component {
       currentDiagram,
       processDefinition
       } = this.props;
+    if (this.state.page == 'home') {
     return (
       <div className="App">
          <AppBar position="static">
@@ -178,6 +180,9 @@ class App extends Component {
                             type="file"
                             onChange={this.onChange}
                         />
+                        <Button color="inherit" component="span" className={`${classes.buttonRight}`}
+                          onClick={() => this.setState({page: 'modeler'})}
+                        >Modeler</Button>
                         <label htmlFor="flat-button-file">
                             <Button color="inherit" component="span" className={`${classes.buttonRight}`}>Deploy</Button>
                         </label>
@@ -240,7 +245,9 @@ class App extends Component {
         <InformationComponent data={currentDiagram.currentChosenTask}/>
         {/* Bottom End */}
       </div>
-    );
+    );} else {
+      return <ModelerComponent back={() => this.setState({page: 'home'})}/>
+    }
   }
 }
 

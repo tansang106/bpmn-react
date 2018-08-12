@@ -1,7 +1,7 @@
 import React from 'react'
 import BpmnViewer from 'bpmn-js'
 import axios from 'axios';
-import './diagram-js.css';
+
 class bpmnView extends React.Component{
   constructor(){
     super();
