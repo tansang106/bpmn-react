@@ -60,7 +60,6 @@ export const startProcessDefinition = (key, data, code) => {
                             key: key,
                             code: code
                         })
-
                     } else {
                         console.log(res)
                     }
