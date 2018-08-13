@@ -19,4 +19,5 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-bpmn-react.rar 
+bpmn-react.rar
+node_modules

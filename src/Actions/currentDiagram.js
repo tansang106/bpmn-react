@@ -126,7 +126,7 @@ export const choosingTaskAction = (chosenTaskId, instanceHistory, isActive) => {
 	}
 }
 
-const completeUserTask = (taskId) => {
+export const completeUserTask = (taskId) => {
 	const username = "BaoTM2";
 	callAPI(`task/${taskId}/complete`,
 			'POST',
@@ -140,8 +140,8 @@ const completeUserTask = (taskId) => {
 				data.push({taskId, username});
 				localStorage.setItem('USER_TASK_HISTORY', JSON.stringify(data));
 			}).catch(err => console.log(err));
-	if (document.getElementById('completeTaskButton')) {
-		document.getElementById('completeTaskButton').disabled = true;
-	}
+	// if (document.getElementById('completeTaskButton')) {
+	// 	document.getElementById('completeTaskButton').disabled = true;
+	// }
 	toastr.success('Đã gửi request!');
 }

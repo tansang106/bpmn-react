@@ -18,8 +18,10 @@ import {
   getInstanceInfoAction,
   getInstanceChildnodeAction,
   getDiagramXMLAction,
-  choosingTaskAction
+  choosingTaskAction,
+  completeUserTask
 } from './Actions/currentDiagram';
+import callAPI from './Utils/callApi';
 import { deployProcessDefinition , getProcessDefinition, startProcessDefinition } from './Actions/processDefinition';
 import { getListIncidentAction } from './Actions/incidentList';
 import Modal from '@material-ui/core/Modal';
@@ -156,6 +158,19 @@ class App extends Component {
     }
     this.props.choosingTask(chosenTaskId, this.props.currentDiagram.instanceHistory, isActive);
   }
+
+  getTaskAction = async (processInstanceId) => {
+    const res = await callAPI(`history/activity-instance?activityType=userTask&processInstanceId=${processInstanceId}`,
+        'GET',
+        {},{})
+    return await res.data[0];
+  }
+
+  onClickAccpetIncident = async (processInstanceId) => {
+    let userTask = await this.getTaskAction(processInstanceId);
+    this.props.completeUserTask(userTask.taskId)
+  }
+
   render() {
     const { 
       classes, 
@@ -163,6 +178,34 @@ class App extends Component {
       currentDiagram,
       processDefinition
       } = this.props;
+
+      let count = 0;
+      let acticeIncident;
+      incidentList.map(n =>{
+          if(n.status === "ACTIVE"){
+              count = 1;
+          }
+      })
+      if(count === 1) {
+          acticeIncident = <div className="dropdown">
+              <span><img style={{width: '40px',height: '40px'}} className="icon_notice" src="http://2.bp.blogspot.com/-mxAwi5zynAA/VQVFqfKZqmI/AAAAAAAAL6o/9zqIKf8nY6k/s1600/Apps-Notifications-icon.png" /></span>
+              <div className="dropdown-content">
+                  {incidentList.map(n => {
+                      if(n.status==="ACTIVE"){
+                          return (
+                              <div key={n.id}>
+                                  {/*<div className="definition-key">{n.definitionKey}</div>*/}
+                                  <div className="btn-accept">
+                                      <Button onClick={() => this.onClickAccpetIncident(n.processInstanceId)}>Accept User Task</Button>
+                                  </div>
+                              </div>
+                          );
+                      }
+                  })}
+              </div>
+          </div>
+      }
+
     if (this.state.page == 'home') {
     return (
       <div className="App">
@@ -180,6 +223,7 @@ class App extends Component {
                             type="file"
                             onChange={this.onChange}
                         />
+                        {acticeIncident}
                         <Button color="inherit" component="span" className={`${classes.buttonRight}`}
                           onClick={() => this.setState({page: 'modeler'})}
                         >Modeler</Button>
@@ -294,6 +338,9 @@ const mapDispatchToProps = (dispatch, props) => {
         },
         getListIncident: () => {
           dispatch(getListIncidentAction())
+        },
+        completeUserTask: (taskId) => {
+            completeUserTask(taskId)
         }
     }
 }
