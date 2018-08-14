@@ -3,9 +3,11 @@ import {CHANGE_DIAGRAM,
 		GET_INSTANCE_INFO,
 		GET_INSTANCE_CHILDNODE,
 		GET_DIAGRAM_XML,
-		CHOOSING_TASK
+		CHOOSING_TASK,
+		COMPLETE_CURRENT_USER_TASK
 } from '../Contanst/ActionType';
 import callAPI from '../Utils/callApi';
+import sccdAPI from '../Utils/sccdApi';
 import moment from 'moment';
 import toastr from 'toastr';
 export const changeDiagramAction = (data) => {
@@ -89,9 +91,9 @@ export const getInstanceChildnodeAction = (processInstanceId) => {
 	}	
 }
 
-export const choosingTaskAction = (chosenTaskId, instanceHistory, isActive) => {
+export const choosingTaskAction = (chosenTaskId, instanceHistory, isActive, TicketCode) => async (dispatch) => {
 	let data = [];
-	instanceHistory.map(eachModel => {
+	instanceHistory.map(async eachModel => {
 		if (eachModel.activityId == chosenTaskId) {
 			data = [
 				{key: 'Activity Name',value: eachModel.activityName},
@@ -102,31 +104,28 @@ export const choosingTaskAction = (chosenTaskId, instanceHistory, isActive) => {
 				if (isActive) {
 					data.unshift({
 						key: 'Complete User Task',
-						value: () => completeUserTask(eachModel.taskId)
+						value: () => completeUserTask(eachModel.taskId, TicketCode, eachModel.processDefinitionKey, eachModel.processInstanceId)
 					})
 				} else {
-					const userTaskHistory = JSON.parse(localStorage.getItem('USER_TASK_HISTORY')) || [];
-					userTaskHistory.map(u => {
-						if (u.taskId == eachModel.taskId) {
-							data.unshift({
-								key: 'Completed By',
-								value: u.username
-							})
-						}
-					})
+					let res = (await sccdAPI(`search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&ticketCode=${TicketCode}`,'GET',{},{})).data.data;
+					res = JSON.parse(res).hits[0]._source;
+					res = res.username ? res.username : 'BaoTM2';
+					data.unshift({
+						key: 'Completed By',
+						value: res
+					});
 				}
 			}
 		}
 	});
-	return (dispatch) => {
-		dispatch({
-			type: CHOOSING_TASK,
-			payload: data
-		})
-	}
+
+	setTimeout(() => dispatch({
+		type: CHOOSING_TASK,
+		payload: data
+	}), 100);
 }
 
-const completeUserTask = (taskId) => {
+export const completeUserTask = (taskId, ticketCode, definitionKey, processInstanceId) => (dispatch) => {
 	const username = "BaoTM2";
 	callAPI(`task/${taskId}/complete`,
 			'POST',
@@ -135,11 +134,18 @@ const completeUserTask = (taskId) => {
 					"username": {"value": username}
 				}
 			},
-			{}).then(res => {
-				let data = JSON.parse(localStorage.getItem('USER_TASK_HISTORY')) || [];
-				data.push({taskId, username});
-				localStorage.setItem('USER_TASK_HISTORY', JSON.stringify(data));
-			}).catch(err => console.log(err));
+			{}).catch(err => console.log(err));
+	sccdAPI(`listen-camunda/log-action?api_key=e3708c4e68dc2654d1c93c91c751284d`, 'POST',
+	{
+		ticketCode,
+		definitionKey,
+		processInstanceId,
+		username
+	},{}).catch(err => console.log(err));
+	dispatch({
+		type: COMPLETE_CURRENT_USER_TASK,
+		ticketCode
+	})
 	if (document.getElementById('completeTaskButton')) {
 		document.getElementById('completeTaskButton').disabled = true;
 	}

@@ -13,7 +13,8 @@ const initialState = {
 	instanceInfo: {},
 	instanceChildnode: [],
 	xml: {},
-	currentChosenTask: []
+	currentChosenTask: [],
+	TicketCode: ''
 }
 
 export default (state = initialState, action) => {
@@ -23,7 +24,8 @@ export default (state = initialState, action) => {
 				...state,
 				processInstanceId: action.payload.processInstanceId,
 				definitionKey: action.payload.definitionKey,
-				currentChosenTask: []
+				currentChosenTask: [],
+				TicketCode: action.payload.TicketCode
 			}
 		case GET_DIAGRAM_XML:
 			return {

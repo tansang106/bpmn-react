@@ -1,0 +1,41 @@
+@keyframes alert-animation {
+    0% {transform: scale(1.1) rotate(-15deg); }
+    50% {transform: scale(1.0) rotate(45deg);}
+    100% {transform: scale(1.1) rotate(-15deg);}
+}
+.alert img {
+	width: 40px;
+	height: 40px;
+	animation: alert-animation 1.5s infinite;
+}
+.alert-content {
+	background: white;
+	position: absolute;
+	display: none;
+	text-align: left;
+	font-size: 10pt;
+	font-weight: bold;
+	color: black;
+	min-height: 100px;
+	min-width: 200px;
+	padding: 5px;
+}
+.alert-content > div {
+	height: 50px;
+}
+.alert-content button {
+	background: #C8613E;
+	border-radius: 5px;
+	border-color: #C8613E;
+	color: white;
+	height: 30px;
+	float: left;
+	margin-left: 5px;
+}
+.alert-content button:hover {
+	background: #3F51B5;
+	border-color: #3F51B5;
+}
+.alert:hover .alert-content {
+	display: block;
+}

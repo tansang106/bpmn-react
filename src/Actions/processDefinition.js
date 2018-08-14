@@ -1,6 +1,7 @@
 import callAPI from '../Utils/callApi';
 import toastr from 'toastr';
-
+import sccdAPI from '../Utils/sccdApi';
+import moment from 'moment';
 export const DEPLOY = 'DEPLOY';
 export const GET_PROCESS_DEFINITION = 'GET_PROCESS_DEFINITION';
 export const START_PROCESS_DEFINITION = 'START_PROCESS_DEFINITION';
@@ -47,26 +48,36 @@ export const getProcessDefinition = () => {
     }
 }
 
-export const startProcessDefinition = (key, data, code) => {
-    return (dispatch) => {
-        return callAPI(`process-definition/key/${key}/start`,
-            'POST', data, {}).then(res => {
-                try {
-                    if (res.status === 200) {
-                        toastr.success('Start Process Success', 'Success')
-                        return dispatch({
-                            type: START_PROCESS_DEFINITION,
-                            data: res.data,
-                            key: key,
-                            code: code
-                        })
-                    } else {
-                        console.log(res)
-                    }
-                } catch (error) {
-                    console.log('Error Start Process', error)
-                }
+export const startProcessDefinition = (definitionKey) => async (dispatch) => {
+    let ticketCode = (await sccdAPI(`search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&processInstanceId=0`,
+        'GET',{},{})).data.data;
+    ticketCode = JSON.parse(ticketCode).hits[0]._source;
+    const date = moment(ticketCode.IssueDate).format("DD-MM-YYYY hh:mm:ss");
+    ticketCode = ticketCode.TicketCode;
 
-            })
-    }
+    const data = {
+        "variables": {
+            "incidentID": {"value": ticketCode}
+        }
+    };
+    let processInstanceId = (await callAPI(`process-definition/key/${definitionKey}/start`,'POST', data, {})).data.id;
+    await sccdAPI(`listen-camunda/log-action?api_key=e3708c4e68dc2654d1c93c91c751284d`, 'POST',
+    {
+        ticketCode,
+        definitionKey,
+        processInstanceId
+    },{}).then(res => {
+        toastr.success('Start Process Success', 'Success');
+        dispatch({
+            type: 'ADD_INCIDENT',
+            payload: {
+                id: ticketCode,
+                definitionKey,
+                processInstanceId,
+                date,
+                status: 'ACTIVE'
+            }
+        })
+    })
+    .catch(err => console.log(err));
 }

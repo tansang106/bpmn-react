@@ -1,21 +1,48 @@
-import {GET_INCIDENT_LIST} from '../Contanst/ActionType.js';
+import {GET_INCIDENT_LIST, GET_CURRENT_USER_TASK} from '../Contanst/ActionType.js';
 import callAPI from '../Utils/callApi';
-
-export const getListIncidentAction = () => {
-	const data = JSON.parse(localStorage.getItem('PROCESS')) || [];
+import sccdAPI from '../Utils/sccdApi';
+import moment from 'moment';
+export const getListIncidentAction = () => async (dispatch) => {
+	try {
 	let payload = [];
-	data.map(d => {
-		callAPI(`history/process-instance/${d.processInstanceId}`)
-		.then(res => {
-			payload.push({...d,status: res.data.state})
+	let data = (await sccdAPI('search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&processInstanceId=1', 
+		'GET',{}, {})).data;
+	data = (await JSON.parse(data.data)).hits;
+	data.map(async d => {
+		let status = (await callAPI(`history/process-instance/${d._source.processInstanceId}`)).data.state;
+		payload.push({
+			id: d._source.TicketCode,
+			date: moment(d._source.IssueDate).format("DD-MM-YYYY hh:mm:ss"),
+			definitionKey: d._source.definitionKey,
+			processInstanceId: d._source.processInstanceId,
+			status: status
 		})
-	});
-	return (dispatch) => {
-		setTimeout(() => {
-			dispatch({
-				type: GET_INCIDENT_LIST,
-				payload: payload
+	})
+	setTimeout( () => dispatch({
+		type: GET_INCIDENT_LIST,
+		payload: payload
+	}) , 500)
+	} catch(ex) {}
+}
+
+export const getCurrentUserTaskAction = (incidentList) => async (dispatch) => {
+	let payload = [];
+	await incidentList.map(async i => {
+		const res = await (await callAPI(`task?processInstanceId=${i.processInstanceId}`)).data;
+		if (res.length > 0) {
+			const date = moment(res[0].created).format("DD-MM-YYYY hh:mm:ss");
+			payload.push({
+				ticketCode: i.id,
+				date,
+				taskId: res[0].id,
+				definitionKey: res[0].processDefinitionId.split(':')[0],
+				processInstanceId: res[0].processInstanceId
 			})
-		}, 2000);
-	}
+		}
+	})
+
+	setTimeout(() => dispatch({
+		type: GET_CURRENT_USER_TASK,
+		payload
+	}), 200);
 }

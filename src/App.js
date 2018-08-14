@@ -18,10 +18,11 @@ import {
   getInstanceInfoAction,
   getInstanceChildnodeAction,
   getDiagramXMLAction,
-  choosingTaskAction
+  choosingTaskAction,
+  completeUserTask
 } from './Actions/currentDiagram';
 import { deployProcessDefinition , getProcessDefinition, startProcessDefinition } from './Actions/processDefinition';
-import { getListIncidentAction } from './Actions/incidentList';
+import { getListIncidentAction, getCurrentUserTaskAction } from './Actions/incidentList';
 import Modal from '@material-ui/core/Modal';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -29,6 +30,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import moment from 'moment';
 import ModelerComponent from './Components/ModelerComponent';
+import AlertNewIncident from './Components/AlertNewIncidentComponent';
 const styles = theme => ({
     root: {
         width: '100%',
@@ -104,14 +106,8 @@ class App extends Component {
       formData.append("upload", this.state.image);
       this.props.deployProcessDefinition(formData);
   }
-  onClickStart = (keyProcess) => {
-      let code = "SC" + moment().format("DDMMYYmmss");
-      let data = {
-          "variables": {
-              "incidentID": { "value": code }
-          }
-      }
-      this.props.startProcessDefinition(keyProcess, data, code);
+  onClickStart = (keyProcess) => { 
+      this.props.startProcessDefinition(keyProcess);
       this.handleClose();
   }
 
@@ -129,11 +125,12 @@ class App extends Component {
       }
       return result;
   }
-  onChangeCurrentDiagram = (processInstanceId, definitionKey) => {
+  onChangeCurrentDiagram = (processInstanceId, definitionKey, TicketCode) => {
     clearInterval(this.interval);
     this.props.changeDiagram({
       processInstanceId: processInstanceId,
-      definitionKey: definitionKey
+      definitionKey: definitionKey,
+      TicketCode
     });
     this.props.getDiagramXML(definitionKey);
     this.props.getInstanceHistory(processInstanceId);
@@ -146,7 +143,7 @@ class App extends Component {
   }
   onClickGetTaskInformation = (chosenTaskId) => {
     let isActive = false;
-    const {instanceChildnode} = this.props.currentDiagram;
+    const {instanceChildnode, TicketCode} = this.props.currentDiagram;
     if(instanceChildnode.childActivityInstances) {
       instanceChildnode.childActivityInstances.map(c => {
         if (c.activityId == chosenTaskId) {
@@ -154,14 +151,18 @@ class App extends Component {
         }
       });
     }
-    this.props.choosingTask(chosenTaskId, this.props.currentDiagram.instanceHistory, isActive);
+    this.props.choosingTask(chosenTaskId, this.props.currentDiagram.instanceHistory, isActive, TicketCode);
+  }
+  getCurrentUserTask = () => {
+    this.props.getCurrentUserTask(this.props.incidentList);
   }
   render() {
     const { 
       classes, 
       incidentList, 
       currentDiagram,
-      processDefinition
+      processDefinition,
+      completeUserTask
       } = this.props;
     if (this.state.page == 'home') {
     return (
@@ -179,6 +180,11 @@ class App extends Component {
                             id="flat-button-file"
                             type="file"
                             onChange={this.onChange}
+                        />
+                        <AlertNewIncident 
+                          getCurrentUserTask={() => this.getCurrentUserTask()}
+                          currentUserTask={this.props.currentUserTask}
+                          completeUserTask={this.props.completeUserTask}
                         />
                         <Button color="inherit" component="span" className={`${classes.buttonRight}`}
                           onClick={() => this.setState({page: 'modeler'})}
@@ -259,7 +265,8 @@ const mapStateToProps = state => {
     return {
         processDefinition: state.processDefinition,
         incidentList: state.incidentList,
-        currentDiagram: state.currentDiagram
+        currentDiagram: state.currentDiagram,
+        currentUserTask: state.currentUserTask
     }
 }
 
@@ -271,8 +278,8 @@ const mapDispatchToProps = (dispatch, props) => {
         getProcessDefinition: () => {
             dispatch(getProcessDefinition())
         },
-        startProcessDefinition: (key, data, code) => {
-            dispatch(startProcessDefinition(key, data, code))
+        startProcessDefinition: (key) => {
+            dispatch(startProcessDefinition(key))
         },
         changeDiagram: (data) => {
           dispatch(changeDiagramAction(data))
@@ -289,11 +296,17 @@ const mapDispatchToProps = (dispatch, props) => {
         getInstanceChildnode: (processInstanceId) => {
           dispatch(getInstanceChildnodeAction(processInstanceId))
         },
-        choosingTask: (chosenTaskId, instanceHistory, isActive) => {
-          dispatch(choosingTaskAction(chosenTaskId, instanceHistory, isActive))
+        choosingTask: (chosenTaskId, instanceHistory, isActive, TicketCode) => {
+          dispatch(choosingTaskAction(chosenTaskId, instanceHistory, isActive, TicketCode))
         },
         getListIncident: () => {
           dispatch(getListIncidentAction())
+        },
+        getCurrentUserTask: (incidentList) => {
+          dispatch(getCurrentUserTaskAction(incidentList))
+        },
+        completeUserTask: (taskId, ticketCode, definitionKey, processInstanceId) => {
+          dispatch(completeUserTask(taskId, ticketCode, definitionKey, processInstanceId))
         }
     }
 }

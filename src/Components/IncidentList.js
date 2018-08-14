@@ -87,7 +87,7 @@ class CustomizedTable extends React.Component {
               return (
                 <TableRow className={classes.row} key={n.id} 
                     onClick={
-                      () => this.props.onChangeCurrentDiagram(n.processInstanceId, n.definitionKey)
+                      () => this.props.onChangeCurrentDiagram(n.processInstanceId, n.definitionKey, n.id)
                     }
                     style={{
                       backgroundColor: currentInstanceID == n.processInstanceId ? '#FFE680' : ''
