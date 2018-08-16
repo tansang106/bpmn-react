@@ -39,26 +39,26 @@ client.subscribe("PhonetoBoss", async ({task, taskService}) => {
     //   host: 'proxylab.scclab.pri',
     //   port: 3128
     // }
-    axios(`http://42.116.254.238:33333/call-phone-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&number=0937378973&provider=mobile&text='We are have new incident ${incidentID}'`)
-    .then(response => {
-        const processVariables = new Variables();
-        if (response.data.status == 200) {
-            //shoud true, false because test email
-            processVariables.set("status", "true");
-            processVariables.set("log", `incidentID ${incidentID} is automatically phoned to boss at ${moment().format("DD-MM-YYYY hh:mm:ss")}`);
-        }
-        else {
-            processVariables.set("status", "false");
-        }
-        taskService.complete(task, processVariables);
-    })
+    // axios(`http://42.116.254.238:33333/call-phone-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&number=0937378973&provider=mobile&text='We are have new incident ${incidentID}'`)
+    // .then(response => {
+    //     const processVariables = new Variables();
+    //     if (response.data.status == 200) {
+    //         //shoud true, false because test email
+    //         processVariables.set("status", "true");
+    //         processVariables.set("log", `incidentID ${incidentID} is automatically phoned to boss at ${moment().format("DD-MM-YYYY hh:mm:ss")}`);
+    //     }
+    //     else {
+    //         processVariables.set("status", "false");
+    //     }
+    //     taskService.complete(task, processVariables);
+    // })
 
 
 
-    // const processVariables = new Variables();
-    // processVariables.set("status", "true");
-    // processVariables.set("log", `incidentID ${incidentID} is automatically phoned to boss at ${moment().format("DD-MM-YYYY hh:mm:ss")}`);
-    // taskService.complete(task, processVariables);
+    const processVariables = new Variables();
+    processVariables.set("status", "true");
+    processVariables.set("log", `incidentID ${incidentID} is automatically phoned to boss at ${moment().format("DD-MM-YYYY hh:mm:ss")}`);
+    taskService.complete(task, processVariables);
 })
 
 

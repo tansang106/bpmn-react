@@ -4,7 +4,7 @@ import sccdAPI from '../Utils/sccdApi';
 import moment from 'moment';
 export const getListIncidentAction = () => async (dispatch) => {
 	let payload = [];
-	let data = (await sccdAPI('search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&processInstanceId=1', 
+	let data = await (await sccdAPI('search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&processInstanceId=1', 
 		'GET',{}, {})).data;
 	data = (await JSON.parse(data.data)).hits;
 	data.map(async d => {
@@ -14,7 +14,7 @@ export const getListIncidentAction = () => async (dispatch) => {
 		}
 		payload.push({
 			id: d._source.TicketCode,
-			date: moment(d._source.IssueDate).format("DD-MM-YYYY hh:mm:ss"),
+			date: moment(d._source['@timestamp']).format("DD-MM-YYYY HH:mm:ss"),
 			definitionKey: d._source.definitionKey,
 			processInstanceId: d._source.processInstanceId,
 			status: status

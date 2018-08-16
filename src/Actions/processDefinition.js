@@ -52,7 +52,7 @@ export const startProcessDefinition = (definitionKey) => async (dispatch) => {
     let ticketCode = (await sccdAPI(`search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&processInstanceId=0`,
         'GET',{},{})).data.data;
     ticketCode = JSON.parse(ticketCode).hits[0]._source;
-    const date = moment(ticketCode.IssueDate).format("DD-MM-YYYY hh:mm:ss");
+    const date = moment(ticketCode['@timestamp']).format('DD-MM-YYYY HH:mm:ss');
     ticketCode = ticketCode.TicketCode;
 
     const data = {
