@@ -7,6 +7,7 @@ app.use(express.static(path.join(__dirname, 'build')));
 app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
+app.listen(3000, () => console.log('SERVER run port 3000'));
 // service worker
 const {
     Client,
@@ -93,5 +94,3 @@ client.subscribe("SendEscalateEmail", async ({task, taskService}) => {
     
     //taskService.complete(task);
 })
-
-app.listen(3000, () => console.log('SERVER run port 3000'));
