@@ -173,7 +173,7 @@ class App extends Component {
                             <MenuIcon />
                         </IconButton>
                         <Typography variant="title" color="inherit" className={`${classes.flex}`}>
-                            News
+                            Demo
                         </Typography>
                         <input
                             className={classes.input}
