@@ -14,10 +14,10 @@
       <bpmn:incoming>SequenceFlow_1reqjab</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_0mqaqm3</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:boundaryEvent id="BoundaryEvent_1xg2nsu" name="5 mins" attachedToRef="TakeIncident">
+    <bpmn:boundaryEvent id="BoundaryEvent_1xg2nsu" name="1 mins" attachedToRef="TakeIncident">
       <bpmn:outgoing>SequenceFlow_0lahboc</bpmn:outgoing>
       <bpmn:timerEventDefinition>
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1M</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1reqjab" sourceRef="LoggerIncident" targetRef="ResolveIncidentEnd" />
@@ -84,7 +84,7 @@
       <bpmndi:BPMNShape id="BoundaryEvent_1dlocy9_di" bpmnElement="BoundaryEvent_1xg2nsu">
         <dc:Bounds x="537" y="181" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="571" y="213" width="33" height="14" />
+          <dc:Bounds x="572" y="213" width="33" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="IntermediateThrowEvent_0vnk4de_di" bpmnElement="IntermediateThrowEvent_1moflal">

@@ -1,12 +1,7 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const phoneNumber = [
-    //'01646465699',
-    '0984456148',
-    '0937378973'
-];
-let indexPhoneNumber = 0;
+
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.get('/', function (req, res) {
@@ -36,15 +31,11 @@ client.subscribe("AlarmtoSCCD", async ({task, taskService}) => {
 
 client.subscribe("PhonetoBoss", async ({task, taskService}) => {
     const incidentID = task.variables.get("incidentID");
-    console.log("Phone to Boss", incidentID, phoneNumber[indexPhoneNumber]);
-    axios(`http://42.116.254.238:33333/call-phone-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&number=${phoneNumber[indexPhoneNumber]}&provider=mobile&text='We are have new incident ${incidentID}'`)
+    console.log("Phone to Boss", incidentID);
+    axios(`http://42.116.254.238:33333/call-phone-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&number=0937378973&provider=mobile&text='We are have new incident ${incidentID}'`)
     .then(response => {
         const processVariables = new Variables();
         if (response.data.status == 200) {
-            indexPhoneNumber++;
-            if (indexPhoneNumber >= phoneNumber.length) {
-                indexPhoneNumber = 0;
-            }
             //shoud true, false because test email
             processVariables.set("status", "true");
             processVariables.set("log", `incidentID ${incidentID} is automatically phoned to boss at ${moment().format("DD-MM-YYYY hh:mm:ss")}`);
