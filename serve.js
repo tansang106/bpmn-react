@@ -16,6 +16,7 @@ const {
   } = require("camunda-external-task-client-js");
 const moment = require("moment");
 const config = { baseUrl: "http://42.116.254.246:8080/engine-rest", use: logger };
+const sccdURL = 'http://42.116.254.219:33333';
 const client = new Client(config);
 const axios = require("axios");
 const fs = require("fs");
@@ -32,7 +33,7 @@ client.subscribe("AlarmtoSCCD", async ({task, taskService}) => {
 client.subscribe("PhonetoBoss", async ({task, taskService}) => {
     const incidentID = task.variables.get("incidentID");
     console.log("Phone to Boss", incidentID);
-    axios(`http://42.116.254.238:33333/call-phone-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&number=0937378973&provider=mobile&text='We are have new incident ${incidentID}'`)
+    axios(`${sccdURL}/call-phone-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&number=0937378973&provider=mobile&text='We are have new incident ${incidentID}'`)
     .then(response => {
         const processVariables = new Variables();
         if (response.data.status == 200) {
@@ -66,7 +67,7 @@ client.subscribe("LoggerIncident", async ({task, taskService}) => {
 
 client.subscribe("SendEscalateEmail", async ({task, taskService}) => {
     console.log('Send email!!!', task.variables.get("incidentID"));
-    axios('http://42.116.254.238:33333/send-mail-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ', {
+    axios(`${sccdURL}/send-mail-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ`, {
         method: 'POST',
         data: {
             TicketCode: task.variables.get("incidentID"),

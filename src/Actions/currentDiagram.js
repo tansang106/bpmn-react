@@ -107,9 +107,8 @@ export const choosingTaskAction = (chosenTaskId, instanceHistory, isActive, Tick
 						value: () => completeUserTask(eachModel.taskId, TicketCode, eachModel.processDefinitionKey, eachModel.processInstanceId)
 					})
 				} else {
-					let res = (await sccdAPI(`search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&ticketCode=${TicketCode}`,'GET',{},{}));
-					res = await res.data.data;
-					res = await JSON.parse(res).hits[0]._source;
+					let res = await sccdAPI(`search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&ticketCode=${TicketCode}`,'GET',{},{});
+					res = res.data.data.hits[0]._source;
 					res = res.username ? res.username : 'BaoTM2';
 					data.unshift({
 						key: 'Completed By',

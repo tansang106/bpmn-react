@@ -7,8 +7,7 @@ export const getListIncidentAction = () => async (dispatch) => {
 	let data = await sccdAPI('search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&processInstanceId=1', 
 		'GET',{}, {});
 	if (data) {
-		data = await data.data;
-		data = await JSON.parse(data.data).hits;
+		data = data.data.data.hits;
 		data.map(async d => {
 			let status = (await callAPI(`history/process-instance/${d._source.processInstanceId}`));
 			if (status) {
@@ -22,7 +21,7 @@ export const getListIncidentAction = () => async (dispatch) => {
 				status: status
 			})
 		})
-	}
+	 }
 	setTimeout( () => dispatch({
 		type: GET_INCIDENT_LIST,
 		payload: payload

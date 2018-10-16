@@ -49,13 +49,13 @@ export const getProcessDefinition = () => {
 }
 
 export const startProcessDefinition = (definitionKey) => async (dispatch) => {
-    let ticketCode = await sccdAPI(`search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&processInstanceId=0`,
+    let ticketAvailable = await sccdAPI(`search-ticket-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ&processInstanceId=0`,
         'GET',{},{});
-    ticketCode = await JSON.parse(ticketCode.data.data) || null;
-    if (ticketCode && ticketCode.hits.length > 0) {
-        ticketCode = await ticketCode.hits[0]._source;
-        const date = moment(ticketCode['@timestamp']).format('DD-MM-YYYY HH:mm:ss');
-        ticketCode = ticketCode.TicketCode;
+    ticketAvailable = ticketAvailable.data.data.hits;
+    if (ticketAvailable.length > 0) {
+        ticketAvailable = ticketAvailable[0]._source;
+        const date = moment(ticketAvailable['@timestamp']).format('DD-MM-YYYY HH:mm:ss');
+        let ticketCode = ticketAvailable.TicketCode;
 
         const data = {
             "variables": {

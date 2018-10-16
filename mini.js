@@ -16,6 +16,7 @@ const {
   } = require("camunda-external-task-client-js");
 const moment = require("moment");
 const config = { baseUrl: "http://42.116.254.246:8080/engine-rest", use: logger };
+const sccdURL = 'http://42.116.254.219:33333';
 const client = new Client(config);
 const axios = require("axios");
 const fs = require("fs");
@@ -78,19 +79,19 @@ client.subscribe("LoggerIncident", async ({task, taskService}) => {
 
 
 
-client.subscribe("SendEscalateEmail", async ({task, taskService}) => {
-    console.log('Send email!!!', task.variables.get("incidentID"));
-    axios('http://42.116.254.238:33333/send-mail-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ', {
-        method: 'POST',
-        data: {
-            TicketCode: task.variables.get("incidentID"),
-            Msg: 'Alarm from Camunda',
-            MailTo: 'baotm2@fpt.com.vn',
-            MailCC: '',
-            Telegram: ''
-        }
-    }).then(res => {
-        console.log('Send mail succesfully!!!', res.data);
-        taskService.complete(task);
-    })
-})
+// client.subscribe("SendEscalateEmail", async ({task, taskService}) => {
+//     console.log('Send email!!!', task.variables.get("incidentID"));
+//     axios('http://42.116.254.238:33333/send-mail-camunda?api_key=n96M1TPG821EdN4mMIjnGKxGytx9W2UJ', {
+//         method: 'POST',
+//         data: {
+//             TicketCode: task.variables.get("incidentID"),
+//             Msg: 'Alarm from Camunda',
+//             MailTo: 'baotm2@fpt.com.vn',
+//             MailCC: '',
+//             Telegram: ''
+//         }
+//     }).then(res => {
+//         console.log('Send mail succesfully!!!', res.data);
+//         taskService.complete(task);
+//     })
+// })
